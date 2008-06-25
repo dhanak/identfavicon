@@ -170,7 +170,7 @@ var identFavIcon = {
                 if (aChannel instanceof Components.interfaces.nsIHttpChannel) {
                     //alert('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
                     if (!aChannel.requestSucceeded ||
-                        !aChannel.contentType.match(/^image\//) ||
+                        // !aChannel.contentType.match(/^image\//) || // some sites report favicon.ico as text/plain !!!
                         aChannel.contentLength == 0)
                     {
                         identFavIcon.createFavicon(this.mTab, this.mDoc);
