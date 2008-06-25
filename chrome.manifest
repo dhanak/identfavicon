@@ -1,0 +1,3 @@
+content     identfavicon                           chrome/content/
+skin        identfavicon classic/1.0               skin/
+overlay     chrome://browser/content/browser.xul   chrome://identfavicon/content/identfavicon.xul
