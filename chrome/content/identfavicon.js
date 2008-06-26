@@ -166,13 +166,11 @@ var identFavIcon = {
             },
             
             onStopRequest: function(aRequest, aChannel /* aContext */, aStatusCode) {
-                //alert('Request "' + aRequest.name + '" finished with code: ' + aChannel.responseStatus);
+                //alert('Request "' + aChannel.URI.spec + '" finished with code: ' + aChannel.responseStatus);
                 if (aChannel instanceof Components.interfaces.nsIHttpChannel) {
                     //alert('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
-                    if (!aChannel.requestSucceeded ||
-                        // !aChannel.contentType.match(/^image\//) || // some sites report favicon.ico as text/plain !!!
-                        aChannel.contentLength == 0)
-                    {
+                    if (!aChannel.requestSucceeded || aChannel.contentLength == 0) {
+                        gBrowser.mFaviconService.addFailedFavicon(aChannel.URI);
                         identFavIcon.createFavicon(this.mTab, this.mDoc);
                     }
                 }
@@ -188,7 +186,7 @@ var identFavIcon = {
         if (identFavIcon.hasExplicitFaviconLink(doc))
             return;
             
-        var docURI = doc.baseURIObject;
+        var docURI = identFavIcon.getDocumentURI(doc);
         if (!gBrowser.shouldLoadFavIcon(docURI))
             return;
             
@@ -196,7 +194,7 @@ var identFavIcon = {
             var tab = gBrowser.mTabs[i];
             if (gBrowser.getBrowserForTab(tab).currentURI.equals(docURI)) {
                 var iconURL = docURI.prePath + "/favicon.ico";
-                if (gBrowser.isFailedIcon(iconURL) && false) {
+                if (gBrowser.isFailedIcon(iconURL)) {
                     // favicon loading failed in this session
                     identFavIcon.createFavicon(tab, doc);
                 } else {
@@ -205,6 +203,14 @@ var identFavIcon = {
                     channel.asyncOpen(new identFavIcon.StreamListener(tab, doc), channel);
                 }
             }
+        }
+    },
+    
+    getDocumentURI: function(aDoc) {
+        try {
+            return this.mIOS.newURI(aDoc.location, null, null);
+        } catch (e) { // NS_ERROR_MALFORMED_URI
+            return aDoc.baseURIObject;
         }
     },
     
@@ -223,7 +229,7 @@ var identFavIcon = {
     },
     
     createFavicon: function(aTab, aDoc) {
-        var docURI = aDoc.baseURIObject;
+        var docURI = this.getDocumentURI(aDoc);
         //alert('Generating identicon for ' + docURI.spec);
         var canvas = aDoc.createElement("canvas");
         canvas.setAttribute('width', '16');
