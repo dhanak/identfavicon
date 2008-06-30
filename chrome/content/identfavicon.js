@@ -222,7 +222,7 @@ var identFavIcon = {
         var links = head.getElementsByTagName('link');
         for (var i = 0; i < links.length; i++) {
             var rel = links.item(i).getAttribute('rel');
-            if (rel == 'shortcut icon' || rel == 'icon')
+            if (rel.toLowerCase() == 'shortcut icon' || rel.toLowerCase() == 'icon')
                 return true;
         }
         return false;
