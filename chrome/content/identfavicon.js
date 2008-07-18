@@ -183,9 +183,6 @@ var identFavIcon = {
     
     onPageLoad: function(aEvent) {
         var doc = aEvent.originalTarget;
-        if (identFavIcon.hasExplicitFaviconLink(doc))
-            return;
-            
         var docURI = identFavIcon.getDocumentURI(doc);
         if (!gBrowser.shouldLoadFavIcon(docURI))
             return;
@@ -193,16 +190,22 @@ var identFavIcon = {
         for (var i = 0; i < gBrowser.mTabs.length; i++) {
             var tab = gBrowser.mTabs[i];
             if (gBrowser.getBrowserForTab(tab).currentURI.equals(docURI)) {
-                var iconURL = docURI.prePath + "/favicon.ico";
-                if (gBrowser.isFailedIcon(iconURL)) {
-                    // favicon loading failed in this session
-                    identFavIcon.createFavicon(tab, doc);
-                } else {
-                    // no favicon information so far, check for presence
-                    var channel = identFavIcon.mIOS.newChannel(iconURL, 0, null);
-                    channel.asyncOpen(new identFavIcon.StreamListener(tab, doc), channel);
-                }
+                var iconURL = identFavIcon.getExplicitFaviconURL(doc) ||
+                              docURI.prePath + "/favicon.ico";
+                identFavIcon.checkIconURL(tab, doc, iconURL);
+                break;
             }
+        }
+    },
+    
+    checkIconURL: function(aTab, aDoc, aIconURL) {
+        if (gBrowser.isFailedIcon(aIconURL)) {
+            // favicon loading failed in this session
+            identFavIcon.createFavicon(aTab, aDoc);
+        } else {
+            // no favicon information so far, check for presence
+            var channel = identFavIcon.mIOS.newChannel(aIconURL, 0, null);
+            channel.asyncOpen(new identFavIcon.StreamListener(aTab, aDoc), channel);
         }
     },
     
@@ -214,18 +217,20 @@ var identFavIcon = {
         }
     },
     
-    hasExplicitFaviconLink: function(aDoc) {
+    getExplicitFaviconURL: function(aDoc) {
         var head = aDoc.getElementsByTagName('head');
         if (head.length != 1)
-            return false;
+            return;
         head = head.item(0);
         var links = head.getElementsByTagName('link');
         for (var i = 0; i < links.length; i++) {
             var rel = links.item(i).getAttribute('rel');
-            if (rel.toLowerCase() == 'shortcut icon' || rel.toLowerCase() == 'icon')
-                return true;
+            if (rel.toLowerCase() == 'shortcut icon' || rel.toLowerCase() == 'icon') {
+                var iconHref = links.item(i).getAttribute('href');
+                return this.mIOS.newURI(iconHref, null, aDoc.baseURIObject).spec;
+            }
         }
-        return false;
+        return;
     },
     
     createFavicon: function(aTab, aDoc) {
