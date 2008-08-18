@@ -168,10 +168,15 @@ var identFavIcon = {
             onStopRequest: function(aRequest, aChannel /* aContext */, aStatusCode) {
                 //alert('Request "' + aChannel.URI.spec + '" finished with code: ' + aChannel.responseStatus);
                 if (aChannel instanceof Components.interfaces.nsIHttpChannel) {
-                    //alert('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
-                    if (!aChannel.requestSucceeded || aChannel.contentLength == 0) {
-                        gBrowser.mFaviconService.addFailedFavicon(aChannel.URI);
-                        identFavIcon.createFavicon(this.mTab, this.mDoc);
+                    if (aChannel.responseStatus == 301) { // redirect, check new location
+                        var newLoc = aChannel.getResponseHeader('Location');
+                        identFavIcon.checkIconURL(this.mTab, this.mDoc, newLoc);
+                    } else {
+                        //alert('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
+                        if (!aChannel.requestSucceeded || aChannel.contentLength == 0) {
+                            gBrowser.mFaviconService.addFailedFavicon(aChannel.URI);
+                            identFavIcon.createFavicon(this.mTab, this.mDoc);
+                        }
                     }
                 }
                 return 0;
