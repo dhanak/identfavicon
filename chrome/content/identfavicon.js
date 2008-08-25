@@ -189,7 +189,8 @@ var identFavIcon = {
     onPageLoad: function(aEvent) {
         var doc = aEvent.originalTarget;
         var docURI = identFavIcon.getDocumentURI(doc);
-        if (!gBrowser.shouldLoadFavIcon(docURI))
+        if (!doc.contentType || doc.contentType.match('^image/.+$') ||
+            !gBrowser.shouldLoadFavIcon(docURI))
             return;
             
         for (var i = 0; i < gBrowser.mTabs.length; i++) {
@@ -198,7 +199,6 @@ var identFavIcon = {
                 var iconURL = identFavIcon.getExplicitFaviconURL(doc) ||
                               docURI.prePath + "/favicon.ico";
                 identFavIcon.checkIconURL(tab, doc, iconURL);
-                break;
             }
         }
     },
