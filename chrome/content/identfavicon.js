@@ -146,8 +146,8 @@ var identFavIcon = {
     IdentFavicon generator
 
     @author  David Hanak
-    @version 0.1
-    @date    June 21, 2008
+    @version 0.1.8
+    @date    August 30, 2008
     */
     mIOS: Components.classes["@mozilla.org/network/io-service;1"]
             .getService(Components.interfaces.nsIIOService),
@@ -173,7 +173,10 @@ var identFavIcon = {
                         identFavIcon.checkIconURL(this.mTab, this.mDoc, newLoc);
                     } else {
                         //alert('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
-                        if (!aChannel.requestSucceeded || aChannel.contentLength == 0) {
+                        if (!aChannel.requestSucceeded ||
+                            !aChannel.contentType.match('^image/.+$') ||
+                            aChannel.contentLength == 0)
+                        {
                             gBrowser.mFaviconService.addFailedFavicon(aChannel.URI);
                             identFavIcon.createFavicon(this.mTab, this.mDoc);
                         }
