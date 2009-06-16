@@ -150,8 +150,8 @@ var identFavIcon = {
       IdentFavicon generator
 
       @author  David Hanak
-      @version 0.2
-      @date    February 14, 2009
+      @version 0.2.1
+      @date    June 16, 2009
     */
     mIOS: Components.classes["@mozilla.org/network/io-service;1"]
     .getService(Components.interfaces.nsIIOService),
@@ -160,6 +160,7 @@ var identFavIcon = {
         return {
             mTab: aTab,
             mDoc: aDoc,
+	    mRecheckTimeoutMS: 1000,
 
             QueryInterface: function(aIID) {
                 if (aIID.equals(Components.interfaces.nsIStreamListener) ||
@@ -170,19 +171,37 @@ var identFavIcon = {
             },
 
             onStopRequest: function(aRequest, aChannel /* aContext */, aStatusCode) {
-                //alert('Request "' + aChannel.URI.spec + '" finished with code: ' + aChannel.responseStatus);
                 if (aChannel instanceof Components.interfaces.nsIHttpChannel) {
+		    var iconURL = aChannel.URI.spec;
+		    identFavIcon.debug('Request "' + iconURL + '" finished with code: ' + aChannel.responseStatus);
                     if (aChannel.responseStatus == 301) { // redirect, check new location
                         var newLoc = aChannel.getResponseHeader('Location');
                         identFavIcon.checkIconURL(this.mTab, this.mDoc, newLoc);
                     } else {
-                        //alert('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
+                        identFavIcon.debug('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
                         if (!aChannel.requestSucceeded || aChannel.contentLength == 0) {
                             gBrowser.mFaviconService.addFailedFavicon(aChannel.URI);
                             identFavIcon.createFavicon(this.mTab, this.mDoc);
-                        }
-                    }
-                }
+			} else { // download succeeded, but it might not be a favicon
+			    var docURI = identFavIcon.getDocumentURI(this.mDoc);
+			    var faviconURI;
+			    try {
+				faviconURI = gBrowser.mFaviconService.getFaviconForPage(docURI);
+				identFavIcon.debug('Expected: ' + iconURL + '\nGot: ' + faviconURI.spec);
+			    } catch (ex) {
+				identFavIcon.debug('getFaviconForPage() failed with ' + ex);
+			    }
+			    if (!faviconURI || iconURL != faviconURI.spec) {
+				identFavIcon.debug('Rechecking favicon with URL ' + iconURL);
+				var tab = this.mTab;
+				var doc = this.mDoc;
+				setTimeout(function() {
+					identFavIcon.checkIconURL(tab, doc, iconURL);
+				    }, this.mRecheckTimeoutMS);
+			    }
+			}
+		    }
+		}
                 return 0;
             },
             onStartRequest: function(aRequest, aContext)                            { return 0; },
@@ -190,24 +209,8 @@ var identFavIcon = {
         };
     },
 
-    onPageLoad: function(aEvent) {
-        var doc = aEvent.originalTarget;
-        var docURI = identFavIcon.getDocumentURI(doc);
-        if (!doc.contentType || doc.contentType.match('^image/.+$') ||
-            !gBrowser.shouldLoadFavIcon(docURI))
-            return;
-
-        for (var i = 0; i < gBrowser.mTabs.length; i++) {
-            var tab = gBrowser.mTabs[i];
-            if (gBrowser.getBrowserForTab(tab).currentURI.equals(docURI)) {
-                var iconURL = identFavIcon.getExplicitFaviconURL(doc) ||
-                    docURI.prePath + "/favicon.ico";
-                identFavIcon.checkIconURL(tab, doc, iconURL);
-            }
-        }
-    },
-
     checkIconURL: function(aTab, aDoc, aIconURL) {
+	identFavIcon.debug('Checking favicon at ' + aIconURL);
         if (gBrowser.isFailedIcon(aIconURL)) {
             // favicon loading failed in this session
             identFavIcon.createFavicon(aTab, aDoc);
@@ -234,7 +237,7 @@ var identFavIcon = {
         var links = head.getElementsByTagName('link');
         for (var i = 0; i < links.length; i++) {
             var rel = links.item(i).getAttribute('rel');
-            if (rel.toLowerCase() == 'shortcut icon' || rel.toLowerCase() == 'icon') {
+            if (rel && (rel.toLowerCase() == 'shortcut icon' || rel.toLowerCase() == 'icon')) {
                 var iconHref = links.item(i).getAttribute('href');
                 return this.mIOS.newURI(iconHref, null, aDoc.baseURIObject).spec;
             }
@@ -244,7 +247,7 @@ var identFavIcon = {
 
     createFavicon: function(aTab, aDoc) {
         var docURI = this.getDocumentURI(aDoc);
-        //alert('Generating identicon for ' + docURI.spec);
+        identFavIcon.debug('Generating identicon for ' + docURI.spec);
         var canvas = aDoc.createElement("canvas");
         canvas.setAttribute('width', '16');
         canvas.setAttribute('height', '16');
@@ -253,7 +256,71 @@ var identFavIcon = {
         gBrowser.setIcon(aTab, iconURL);
     },
 
-    init: function() {
-        gBrowser.addEventListener("load", this.onPageLoad, true);
+    onPageShow: function(aEvent) {
+	try {
+	    var doc = aEvent.originalTarget;
+	    var docURI = identFavIcon.getDocumentURI(doc);
+	    identFavIcon.debug('onPageShow() ' + docURI.spec);
+	    if (!doc.contentType || doc.contentType.match('^image/.+$') ||
+		!gBrowser.shouldLoadFavIcon(docURI))
+		return;
+
+	    for (var i = 0; i < gBrowser.mTabs.length; i++) {
+		var tab = gBrowser.mTabs[i];
+		if (gBrowser.getBrowserForTab(tab).currentURI.equals(docURI)) {
+		    identFavIcon.debug('Tab found for document ' + docURI.spec);
+		    var iconURL = identFavIcon.getExplicitFaviconURL(doc) ||
+			docURI.prePath + "/favicon.ico";
+		    identFavIcon.checkIconURL(tab, doc, iconURL);
+		}
+	    }
+	} catch (ex) {
+	    //alert('onPageShow() threw exception ' + ex);
+	}
     },
+
+    // new entry point from mTabsProgressListener
+    /*
+    onStateChange: function(aBrowser, aWebProgress, aRequest, aStateFlags, aStatus) {
+	try {
+	    identFavIcon.debug('onStateChange() ' + aBrowser.currentURI.spec + ' ' + aStateFlags);
+	    if ((aStateFlags & Components.interfaces.nsIWebProgressListener.STATE_IS_NETWORK) &&
+		(aStateFlags & Components.interfaces.nsIWebProgressListener.STATE_STOP)) {
+		var doc = aBrowser.contentDocument;
+		if (!doc.contentType || doc.contentType.match('^image/.+$') ||
+		    !gBrowser.shouldLoadFavIcon(aBrowser.currentURI)) {
+		    return;
+		}
+		for (var i = 0; i < gBrowser.mTabs.length; i++) {
+		    var tab = gBrowser.mTabs[i];
+		    if (gBrowser.getBrowserForTab(tab) == aBrowser) {
+			var iconURL = identFavIcon.getExplicitFaviconURL(doc) ||
+			    aBrowser.currentURI.prePath + "/favicon.ico";
+			identFavIcon.checkIconURL(tab, doc, iconURL);
+			break;
+		    }
+		}
+	    }
+	} catch (ex) {
+	    alert('onStateChange() threw exception ' + ex);
+	}
+    },
+    */
+
+    debug: function(aMessage) {
+	if (0) {
+	    var consoleService = Components.classes["@mozilla.org/consoleservice;1"]
+	    .getService(Components.interfaces.nsIConsoleService);
+	    consoleService.logStringMessage("IdentFavIcon: " + aMessage);
+	}
+    },
+
+    init: function() {
+	/*
+	if (gBrowser.addTabsProgressListener)
+	    gBrowser.addTabsProgressListener(this);
+	else
+	*/
+	gBrowser.addEventListener("pageshow", this.onPageShow, true);
+    }
 };
