@@ -1,3 +1,25 @@
+/*
+  Copyright (c) David Hanak, Don Park, webtoolkit.info
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+*/
+
 window.addEventListener("load", function() { identFavIcon.init(); }, false);
 
 var identFavIcon = {
@@ -150,8 +172,8 @@ var identFavIcon = {
       IdentFavicon generator
 
       @author  David Hanak
-      @version 0.2.1
-      @date    June 16, 2009
+      @version 0.2.2
+      @date    June 30, 2009
     */
     mIOS: Components.classes["@mozilla.org/network/io-service;1"]
     .getService(Components.interfaces.nsIIOService),
@@ -229,6 +251,17 @@ var identFavIcon = {
         }
     },
 
+    getTabForDocument: function(aDocURI) {
+	for (var i = 0; i < gBrowser.mTabs.length; i++) {
+	    var tab = gBrowser.mTabs[i];
+	    if (gBrowser.getBrowserForTab(tab).currentURI.equals(aDocURI)) {
+		this.debug('Tab found for document ' + aDocURI.spec);
+		return tab;
+	    }
+	}
+	return null;
+    },
+
     getExplicitFaviconURL: function(aDoc) {
         var head = aDoc.getElementsByTagName('head');
         if (head.length != 1)
@@ -264,18 +297,35 @@ var identFavIcon = {
 	    if (!doc.contentType || doc.contentType.match('^image/.+$') ||
 		!gBrowser.shouldLoadFavIcon(docURI))
 		return;
-
-	    for (var i = 0; i < gBrowser.mTabs.length; i++) {
-		var tab = gBrowser.mTabs[i];
-		if (gBrowser.getBrowserForTab(tab).currentURI.equals(docURI)) {
-		    identFavIcon.debug('Tab found for document ' + docURI.spec);
-		    var iconURL = identFavIcon.getExplicitFaviconURL(doc) ||
-			docURI.prePath + "/favicon.ico";
-		    identFavIcon.checkIconURL(tab, doc, iconURL);
-		}
+	    var tab = identFavIcon.getTabForDocument(docURI);
+	    if (tab) {
+		var iconURL = identFavIcon.getExplicitFaviconURL(doc) ||
+		    docURI.prePath + "/favicon.ico";
+		identFavIcon.checkIconURL(tab, doc, iconURL);
 	    }
 	} catch (ex) {
 	    //alert('onPageShow() threw exception ' + ex);
+	}
+    },
+
+    reloadFavicon: function() {
+	try {
+	    var doc = document.popupNode.ownerDocument;
+	    var docURI = this.getDocumentURI(doc);
+	    if (!doc.contentType || doc.contentType.match('^image/.+$') ||
+		!gBrowser.shouldLoadFavIcon(docURI))
+		return;
+	    identFavIcon.debug("Reloading favicon for " + docURI.spec);
+	    var tab = this.getTabForDocument(docURI);
+	    if (tab) {
+		var iconURL = this.getExplicitFaviconURL(doc) || docURI.prePath + "/favicon.ico";
+		var iconURI = this.mIOS.newURI(iconURL, null, doc.baseURIObject);
+		gBrowser.mFaviconService.removeFailedFavicon(iconURI);
+		gBrowser.setIcon(tab, iconURL);
+		this.checkIconURL(tab, doc, iconURL);
+	    }
+	} catch (ex) {
+	    //alert("reladFavicon() threw exception " + ex);
 	}
     },
 

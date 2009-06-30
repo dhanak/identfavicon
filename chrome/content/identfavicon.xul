@@ -2,4 +2,8 @@
 <overlay id="identfavicon" 
          xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
   <script type="application/x-javascript" src="chrome://identfavicon/content/identfavicon.js"/>
+  <popup id="contentAreaContextMenu">
+    <menuseparator/>
+    <menuitem id="favicon-reload" label="Reload Page Favicon" oncommand="identFavIcon.reloadFavicon();"/>
+  </popup>
 </overlay>
