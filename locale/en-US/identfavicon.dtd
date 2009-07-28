@@ -1,10 +1,13 @@
-<!ENTITY identfavicon.reloadfavicon		"Reload Page Favicon">
-<!ENTITY identfavicon.preferences		"IdentFavIcon Preferences">
-<!ENTITY identfavicon.addcontextmenuitem	"Add &quot;Reload&quot; context menu item">
-<!ENTITY identfavicon.contextmenugroup		"Context Menu Behavior">
-<!ENTITY identfavicon.sites			"Sites">
-<!ENTITY identfavicon.site			"Site">
-<!ENTITY identfavicon.sitestate			"State">
-<!ENTITY identfavicon.siteaddress		"Address of Web Site">
-<!ENTITY identfavicon.always			"Always">
-<!ENTITY identfavicon.never			"Never">
+<!ENTITY reloadfavicon.label		"Reload Page Favicon">
+<!ENTITY preferences.title		"IdentFavIcon Preferences">
+<!ENTITY contextmenugroup.caption	"Context Menu Behavior">
+<!ENTITY addcontextmenuitem.label	"Add &quot;Reload&quot; context menu item">
+<!ENTITY sites.caption			"Sites">
+<!ENTITY column.site			"Site">
+<!ENTITY column.state			"State">
+<!ENTITY siteaddress.label		"Address of Web Site">
+<!ENTITY desc.sitepref			"When to generate a favicon for the above site?">
+<!ENTITY button.always			"Always">
+<!ENTITY button.never			"Never">
+<!ENTITY button.remove			"Remove Site">
+<!ENTITY button.removeall		"Remove All Sites">

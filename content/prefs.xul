@@ -2,40 +2,46 @@
 <?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
 <!DOCTYPE dialog SYSTEM "chrome://identfavicon/locale/identfavicon.dtd">
 <prefwindow id="identfaviconPrefs" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-     title="&identfavicon.preferences;" onload="gIdentFavIcon_prefs.init()" style="width:40em;">
-  <script src="chrome://identfavicon/content/prefs.js"/>
-  <stringbundle id="bundle" src="chrome://identfavicon/locale/identfavicon.properties"/>
+	    title="&preferences.title;" onload="gIdentFavIcon.init()" style="width:40em;">
   <prefpane flex="1">
     <preferences>
-      <preference id="extensions.identfavicon.addcontextmenuitem"
-		  name="extensions.identfavicon.addcontextmenuitem"
-		  type="bool" />
+      <preference id="prefAddContextMenuItem" name="extensions.identfavicon.addcontextmenuitem" type="bool" />
+      <preference id="prefSitesAlways" name="extensions.identfavicon.sites.always" type="string" />
+      <preference id="prefSitesNever" name="extensions.identfavicon.sites.never" type="string" />
     </preferences>
     <groupbox>
-      <caption label="&identfavicon.contextmenugroup;" />
-      <checkbox label="&identfavicon.addcontextmenuitem;"
-		preference="extensions.identfavicon.addcontextmenuitem" />
+      <caption label="&contextmenugroup.caption;" />
+      <checkbox label="&addcontextmenuitem.label;" preference="prefAddContextMenuItem" />
     </groupbox>
     <groupbox flex="1">
-      <caption label="&identfavicon.sites;" />
-      <label control="tbSite" value="&identfavicon.siteaddress;:"/>
-      <textbox id="tbSite" oninput="gIdentFavIcon_prefs.onHostInput(event.target);"
-               onkeypress="gIdentFavIcon_prefs.onHostKeyPress(event);"/>
-      <hbox pack="end">
-	<button id="btnAlways" label="&identfavicon.always;" disabled="true"
-		oncommand="gIdentFavIcon_prefs.addSiteState(1);"/>
-	<button id="btnNever" label="&identfavicon.never;" disabled="true"
-		oncommand="gIdentFavIcon_prefs.addSiteState(0);"/>
+      <caption label="&sites.caption;" />
+      <label control="tbSite" value="&siteaddress.label;:"/>
+      <textbox id="tbSite" oninput="gIdentFavIcon.onHostInput(event.target);"
+               onkeypress="gIdentFavIcon.onHostKeyPress(event);"/>
+      <hbox align="center">
+	<description flex="1">&desc.sitepref;</description>
+	<button id="btnAlways" label="&button.always;" disabled="true"
+		oncommand="gIdentFavIcon.addSiteState(1);"/>
+	<button id="btnNever" label="&button.never;" disabled="true"
+		oncommand="gIdentFavIcon.addSiteState(0);"/>
       </hbox>
       <separator class="thin"/>
-      <tree id="trSites" onselect="gIdentFavIcon_prefs.onSiteSelected();"
+      <tree id="trSites" onselect="gIdentFavIcon.onSiteSelected();"
 	    hidecolumnpicker="true" style="height: 18em;" flex="1">
 	<treecols>
-	  <treecol id="trcSite" label="&identfavicon.site;" flex="1"/>
-	  <treecol id="trcState" label="&identfavicon.sitestate;"/>
+	  <treecol id="trcSite" label="&column.site;" flex="1"/>
+	  <treecol id="trcState" label="&column.state;"/>
 	</treecols>
 	<treechildren/>
       </tree>
+      <hbox pack="start">
+	<button id="btnRemove" label="&button.remove;" disabled="true"
+		oncommand="gIdentFavIcon.removeSelectedSites()"/>
+	<button id="btnRemoveAll" label="&button.removeall;"
+		oncommand="gIdentFavIcon.removeAllSites()"/>
+      </hbox>
     </groupbox>
   </prefpane>
+  <stringbundle id="bundle" src="chrome://identfavicon/locale/identfavicon.properties"/>
+  <script src="chrome://identfavicon/content/prefs.js"/>
 </prefwindow>

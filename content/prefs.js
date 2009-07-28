@@ -20,24 +20,24 @@
   THE SOFTWARE.
 */
 
-var gIdentFavIcon_prefs = {
+var gIdentFavIcon = {
     SiteState: function(aHost, aState) {
 	this.state = aState;
 	this.__defineGetter__("host", function() { return aHost; });
 	this.__defineGetter__("stateStr", function() {
-		return gIdentFavIcon_prefs.mBundle.getString(this.state ? "always" : "never");
+		return gIdentFavIcon.mBundle.getString(this.state ? "always" : "never");
 	    });
     },
 
+    bind: function(obj, func) { return function() { return func.apply(obj, arguments); }; },
+
     mView: {
-	states: [],
+	states: new Array(0),
+	sortCol: '',
+	sortOrder: 0,
+
 	get rowCount() { return this.states.length; },
-	getCellText: function (aRow, aColumn) {
-	    if (aColumn.id == "trcSite") return this.states[aRow].host;
-	    else if (aColumn.id == "trcState") return this.states[aRow].stateStr;
-	    return "";
-	},
-	setTree: function(treebox) { this.treebox = treebox; },
+
 	isContainer: function(row) { return false; },
 	isSeparator: function(row) { return false; },
 	isSorted: function() { return true; },
@@ -45,15 +45,70 @@ var gIdentFavIcon_prefs = {
 	getImageSrc: function(row,col) { return null; },
 	getRowProperties: function(row,props) {},
 	getColumnProperties: function(colid,col,props) {},
-	getCellProperties: function(row,column,prop) { prop.AppendElement(gIdentFavIcon_prefs.mLtrAtom); },
-	cycleColumn: function(col) {}
+	setTree: function(treebox) { this.treebox = treebox; },
+
+	getCellText: function (aRow, aColumn) {
+	    if (aColumn.id == "trcSite") return this.states[aRow].host;
+	    else if (aColumn.id == "trcState") return this.states[aRow].stateStr;
+	    return "";
+	},
+	getCellProperties: function(row,column,prop) { prop.AppendElement(gIdentFavIcon.mLtrAtom); },
+	cycleHeader: function(aCol) { this.sortOnColumn(aCol.id, -this.sortOrder); },
+	sortOnColumn: function(aCol, aOrd) {
+	    if (this.sortCol != aCol) {
+		this.sortCol = aCol;
+		this.sortOrder = 1;
+	    } else {
+		this.sortOrder = aOrd
+	    }
+	    this.treebox.beginUpdateBatch();
+	    this.states.sort(gIdentFavIcon.bind(this, function(a,b) {
+			var field;
+			if (this.sortCol == "trcSite") field = 'host';
+			else if (this.sortCol == "trcState") field = 'stateStr';
+			else return;
+			if (a[field] < b[field]) return -this.sortOrder;
+			if (a[field] == b[field]) return 0;
+			return this.sortOrder;
+		    }));
+	    this.treebox.endUpdateBatch();
+	}
     },
-  
+    
     init: function() {
 	this.mLtrAtom = Components.classes["@mozilla.org/atom-service;1"]
 		.getService(Components.interfaces.nsIAtomService).getAtom("ltr");
 	this.mBundle = document.getElementById("bundle");
+	this.mAlwaysPref = document.getElementById("prefSitesAlways");
+	this.mNeverPref = document.getElementById("prefSitesNever");
+
+	if (this.mAlwaysPref.value) {
+	    var sites = this.mAlwaysPref.value.split(',');
+	    for (var i = 0; i < sites.length; ++i)
+		this.mView.states.push(new this.SiteState(sites[i], 1));
+	}
+	if (this.mNeverPref.value) {
+	    sites = this.mNeverPref.value.split(',');
+	    for (var i = 0; i < sites.length; ++i)
+		this.mView.states.push(new this.SiteState(sites[i], 0));
+	}
+
+	document.getElementById("btnRemoveAll").disabled = this.mView.states.length == 0;
 	document.getElementById("trSites").view = this.mView;
+	this.mView.sortOnColumn('trcSite', 1);
+    },
+
+    updatePrefs: function() {
+	var always = [];
+	var never = [];
+	for (var i = 0; i < this.mView.states.length; ++i) {
+	    if (this.mView.states[i].state)
+		always.push(this.mView.states[i].host);
+	    else
+		never.push(this.mView.states[i].host);
+	}
+	this.mAlwaysPref.value = always.join(",");
+	this.mNeverPref.value = never.join(",");
     },
 
     onHostInput: function(aSiteField) {
@@ -64,6 +119,10 @@ var gIdentFavIcon_prefs = {
     onHostKeyPress: function(aEvent) {
 	if (aEvent.keyCode == KeyEvent.DOM_VK_RETURN)
 	    document.getElementById("btnAlways").click();
+    },
+
+    onSiteSelected: function() {	
+	document.getElementById("btnRemove").disabled = this.mView.selection.getRangeCount() == 0;
     },
 
     addSiteState: function(aState) {
@@ -101,11 +160,38 @@ var gIdentFavIcon_prefs = {
 	    this.mView.states.push(new this.SiteState(host, aState));
 	    tbo.rowCountChanged(this.mView.states.length-1, 1);
 	}
+	this.updatePrefs();
+
 	textbox.value = "";
 	textbox.focus();
 	this.onHostInput(textbox);
 
 	// enable "remove all" button as needed
-	//document.getElementById("removeAllPermissions").disabled = this._permissions.length == 0;
+	document.getElementById("btnRemoveAll").disabled = this.mView.states.length == 0;
+    },
+
+    removeAllSites: function() {
+	var tbo = document.getElementById('trSites').treeBoxObject;
+	tbo.beginUpdateBatch();
+	this.mView.states = [];
+	tbo.endUpdateBatch();
+	this.updatePrefs();
+    },
+
+    removeSelectedSites: function() {
+	var tree = document.getElementById('trSites');
+	var selection = tree.view.selection;
+	var removed = 0;
+	tree.treeBoxObject.beginUpdateBatch();
+	for (var i = 0; i < selection.getRangeCount(); ++i) {
+	    var from = new Object();
+	    var to = new Object();
+	    selection.getRangeAt(i, from, to);
+	    this.mView.states.splice(from.value-removed, to.value-from.value+1);
+	    removed += to.value-from.value+1;
+	}
+	selection.clearSelection();
+	tree.treeBoxObject.endUpdateBatch();
+	this.updatePrefs();
     },
 };
