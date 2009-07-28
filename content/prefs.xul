@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<!DOCTYPE dialog SYSTEM "chrome://identfavicon/locale/identfavicon.dtd">
+<prefwindow id="identfaviconPrefs" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+     title="&identfavicon.preferences;" onload="gIdentFavIcon_prefs.init()" style="width:40em;">
+  <script src="chrome://identfavicon/content/prefs.js"/>
+  <stringbundle id="bundle" src="chrome://identfavicon/locale/identfavicon.properties"/>
+  <prefpane flex="1">
+    <preferences>
+      <preference id="extensions.identfavicon.addcontextmenuitem"
+		  name="extensions.identfavicon.addcontextmenuitem"
+		  type="bool" />
+    </preferences>
+    <groupbox>
+      <caption label="&identfavicon.contextmenugroup;" />
+      <checkbox label="&identfavicon.addcontextmenuitem;"
+		preference="extensions.identfavicon.addcontextmenuitem" />
+    </groupbox>
+    <groupbox flex="1">
+      <caption label="&identfavicon.sites;" />
+      <label control="tbSite" value="&identfavicon.siteaddress;:"/>
+      <textbox id="tbSite" oninput="gIdentFavIcon_prefs.onHostInput(event.target);"
+               onkeypress="gIdentFavIcon_prefs.onHostKeyPress(event);"/>
+      <hbox pack="end">
+	<button id="btnAlways" label="&identfavicon.always;" disabled="true"
+		oncommand="gIdentFavIcon_prefs.addSiteState(1);"/>
+	<button id="btnNever" label="&identfavicon.never;" disabled="true"
+		oncommand="gIdentFavIcon_prefs.addSiteState(0);"/>
+      </hbox>
+      <separator class="thin"/>
+      <tree id="trSites" onselect="gIdentFavIcon_prefs.onSiteSelected();"
+	    hidecolumnpicker="true" style="height: 18em;" flex="1">
+	<treecols>
+	  <treecol id="trcSite" label="&identfavicon.site;" flex="1"/>
+	  <treecol id="trcState" label="&identfavicon.sitestate;"/>
+	</treecols>
+	<treechildren/>
+      </tree>
+    </groupbox>
+  </prefpane>
+</prefwindow>

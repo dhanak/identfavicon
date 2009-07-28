@@ -1,0 +1,10 @@
+<!ENTITY identfavicon.reloadfavicon		"Reload Page Favicon">
+<!ENTITY identfavicon.preferences		"IdentFavIcon Preferences">
+<!ENTITY identfavicon.addcontextmenuitem	"Add &quot;Reload&quot; context menu item">
+<!ENTITY identfavicon.contextmenugroup		"Context Menu Behavior">
+<!ENTITY identfavicon.sites			"Sites">
+<!ENTITY identfavicon.site			"Site">
+<!ENTITY identfavicon.sitestate			"State">
+<!ENTITY identfavicon.siteaddress		"Address of Web Site">
+<!ENTITY identfavicon.always			"Always">
+<!ENTITY identfavicon.never			"Never">

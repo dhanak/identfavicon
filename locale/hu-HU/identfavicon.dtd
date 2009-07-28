@@ -1,0 +1,10 @@
+<!ENTITY identfavicon.reloadfavicon		"Oldal ikonjának frissítése">
+<!ENTITY identfavicon.preferences		"IdentFavIcon beállítások">
+<!ENTITY identfavicon.addcontextmenuitem	"&quot;Frissítés&quot; menüpont a felugró menübe">
+<!ENTITY identfavicon.contextmenugroup		"Felugró menü">
+<!ENTITY identfavicon.sites			"Webhelyek">
+<!ENTITY identfavicon.site			"Webhely">
+<!ENTITY identfavicon.sitestate			"Állapot">
+<!ENTITY identfavicon.siteaddress		"Webhely címe">
+<!ENTITY identfavicon.always			"Mindig">
+<!ENTITY identfavicon.never			"Soha">

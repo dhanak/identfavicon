@@ -1,0 +1,7 @@
+#favicon-reload {
+    list-style-image: url("chrome://identfavicon/skin/identfavicon16.png");
+}
+
+#favicon-reload[disabled] {
+    list-style-image: url("chrome://identfavicon/skin/identfavicon16-gs.png");
+}

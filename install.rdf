@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>identfavicon@david.hanak.hu</em:id>
-    <em:version>0.2.2</em:version>
+    <em:version>0.3</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -25,5 +25,6 @@
     <em:contributor>Don Park</em:contributor>
     <em:homepageURL>http://www.cs.bme.hu/~dhanak/identfavicon/</em:homepageURL>
     <em:iconURL>chrome://identfavicon/skin/identfavicon.png</em:iconURL>
+    <em:optionsURL>chrome://identfavicon/content/prefs.xul</em:optionsURL>  
   </Description>
 </RDF>
