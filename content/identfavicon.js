@@ -182,11 +182,19 @@ var gIdentFavIcon = {
     mConsole: Components.classes["@mozilla.org/consoleservice;1"]
     .getService(Components.interfaces.nsIConsoleService),
 
+    mSitePrefs: new Array(),
+
+    bind: function(aFunc, aObj) {
+	if (!aObj) aObj = this;
+	return function() { return aFunc.apply(aObj, arguments); };
+    },
+
     StreamListener: function(aTab, aDoc) {
         return {
             mTab: aTab,
             mDoc: aDoc,
 	    mRecheckTimeoutMS: 1000,
+	    mMaxAttemptCount: 10,
 
             QueryInterface: function(aIID) {
                 if (aIID.equals(Components.interfaces.nsIStreamListener) ||
@@ -209,41 +217,50 @@ var gIdentFavIcon = {
                             gBrowser.mFaviconService.addFailedFavicon(aChannel.URI);
                             gIdentFavIcon.createFavicon(this.mTab, this.mDoc);
 			} else { // download succeeded, but it might not be a favicon
-			    var docURI = gIdentFavIcon.getDocumentURI(this.mDoc);
-			    var faviconURI;
-			    try {
-				faviconURI = gBrowser.mFaviconService.getFaviconForPage(docURI);
-				gIdentFavIcon.debug('Expected: ' + iconURL + '\nGot: ' + faviconURI.spec);
-			    } catch (ex) {
-				gIdentFavIcon.debug('getFaviconForPage() failed with ' + ex);
-			    }
-			    if (!faviconURI || iconURL != faviconURI.spec) {
-				gIdentFavIcon.debug('Rechecking favicon with URL ' + iconURL);
-				var tab = this.mTab;
-				var doc = this.mDoc;
-				setTimeout(function() {
-					gIdentFavIcon.checkIconURL(tab, doc, iconURL);
-				    }, this.mRecheckTimeoutMS);
-			    }
+			    this.checkFaviconURI(iconURL, 1);
 			}
 		    }
 		}
                 return 0;
+	    },
+
+	    checkFaviconURI: function(aIconURL, aAttempt) {
+		var docURI = gIdentFavIcon.getDocumentURI(this.mDoc);
+		var faviconURI;
+		try {
+		    faviconURI = gBrowser.mFaviconService.getFaviconForPage(docURI);
+		    gIdentFavIcon.debug('Expected: ' + aIconURL + '\nGot: ' + faviconURI.spec);
+		} catch (ex) {
+		    gIdentFavIcon.debug('getFaviconForPage() failed with ' + ex);
+		}
+		if (!faviconURI || aIconURL != faviconURI.spec) {
+		    if (aAttempt < this.mMaxAttemptCount) {
+			gIdentFavIcon.debug('Recheck #' + aAttempt + ' favicon with URL ' + aIconURL);
+			setTimeout(gIdentFavIcon.bind(function() {
+				    this.checkFaviconURI(aIconURL, aAttempt+1);
+				}, this), this.mRecheckTimeoutMS);
+		    } else { // give up and create favicon
+			gIdentFavIcon.debug('Gave up after ' + this.mMaxAttemptCount + ' attempts.');
+			gIdentFavIcon.createFavicon(this.mTab, this.mDoc);
+		    }
+		}
             },
+
             onStartRequest: function(aRequest, aContext)                            { return 0; },
             onDataAvailable: function(aRequest, aContext, aStream, aOffset, aCount) { return 0; }
         };
     },
 
     checkIconURL: function(aTab, aDoc, aIconURL) {
-	gIdentFavIcon.debug('Checking favicon at ' + aIconURL);
-        if (gBrowser.isFailedIcon(aIconURL)) {
+	var sitepref = this.mSitePrefs[this.getDocumentURI(aDoc).host];
+	this.debug('Checking favicon at ' + aIconURL + ', site pref: ' + sitepref);
+        if (gBrowser.isFailedIcon(aIconURL) || sitepref > 0) {
             // favicon loading failed in this session
-            gIdentFavIcon.createFavicon(aTab, aDoc);
-        } else {
+            this.createFavicon(aTab, aDoc);
+        } else if (!sitepref) {
             // no favicon information so far, check for presence
-            var channel = gIdentFavIcon.mIOS.newChannel(aIconURL, 0, null);
-            channel.asyncOpen(new gIdentFavIcon.StreamListener(aTab, aDoc), channel);
+            var channel = this.mIOS.newChannel(aIconURL, 0, null);
+            channel.asyncOpen(new this.StreamListener(aTab, aDoc), channel);
         }
     },
 
@@ -284,7 +301,7 @@ var gIdentFavIcon = {
 
     createFavicon: function(aTab, aDoc) {
         var docURI = this.getDocumentURI(aDoc);
-        gIdentFavIcon.debug('Generating identicon for ' + docURI.spec);
+        this.debug('Generating identicon for ' + docURI.spec);
         var canvas = aDoc.createElement("canvas");
         canvas.setAttribute('width', '16');
         canvas.setAttribute('height', '16');
@@ -296,16 +313,16 @@ var gIdentFavIcon = {
     onPageShow: function(aEvent) {
 	try {
 	    var doc = aEvent.originalTarget;
-	    var docURI = gIdentFavIcon.getDocumentURI(doc);
-	    gIdentFavIcon.debug('onPageShow() ' + docURI.spec);
+	    var docURI = this.getDocumentURI(doc);
+	    this.debug('onPageShow() ' + docURI.spec);
 	    if (!doc.contentType || doc.contentType.match('^image/.+$') ||
 		!gBrowser.shouldLoadFavIcon(docURI))
 		return;
-	    var tab = gIdentFavIcon.getTabForDocument(docURI);
+	    var tab = this.getTabForDocument(docURI);
 	    if (tab) {
-		var iconURL = gIdentFavIcon.getExplicitFaviconURL(doc) ||
+		var iconURL = this.getExplicitFaviconURL(doc) ||
 		    docURI.prePath + "/favicon.ico";
-		gIdentFavIcon.checkIconURL(tab, doc, iconURL);
+		this.checkIconURL(tab, doc, iconURL);
 	    }
 	} catch (ex) {
 	    if (this.mPrefs.getBoolPref("debug"))
@@ -320,7 +337,7 @@ var gIdentFavIcon = {
 	    if (!doc.contentType || doc.contentType.match('^image/.+$') ||
 		!gBrowser.shouldLoadFavIcon(docURI))
 		return;
-	    gIdentFavIcon.debug("Reloading favicon for " + docURI.spec);
+	    this.debug("Reloading favicon for " + docURI.spec);
 	    var tab = this.getTabForDocument(docURI);
 	    if (tab) {
 		var iconURL = this.getExplicitFaviconURL(doc) || docURI.prePath + "/favicon.ico";
@@ -342,24 +359,57 @@ var gIdentFavIcon = {
 
     showContextMenuItem: function(aEvent) {
 	try {
-	    if (gIdentFavIcon.mPrefs.getBoolPref("addcontextmenuitem")) {
+	    if (this.mPrefs.getBoolPref("addcontextmenuitem")) {
 		document.getElementById("favicon-reload").hidden = false;
 		var doc = document.popupNode.ownerDocument;
-		var docURI = gIdentFavIcon.getDocumentURI(doc);
-		gIdentFavIcon.debug("showContextMenuItem() " + docURI.spec);
+		var docURI = this.getDocumentURI(doc);
+		this.debug("showContextMenuItem() " + docURI.spec);
 		document.getElementById("favicon-reload").disabled = !gBrowser.shouldLoadFavIcon(docURI);
 	    } else {
 		document.getElementById("favicon-reload").hidden = true;
 	    }
 	} catch (ex) {
-	    if (gIdentFavIcon.mPrefs.getBoolPref("debug"))
+	    if (this.mPrefs.getBoolPref("debug"))
 		alert("showContextMenuItem() threw exception " + ex);
 	}
     },
 
+    parsePrefString: function(aPref, aValue) {
+	var sites = aPref.split(',');
+	for (var i = 0; i < sites.length; ++i) {
+	    if (sites[i])
+		this.mSitePrefs[sites[i]] = aValue;
+	}
+    },
+
+    parsePreferences: function() {
+	this.mSitePrefs = new Array();
+	this.parsePrefString(this.mPrefs.getCharPref("sites.always"), 1);
+	this.parsePrefString(this.mPrefs.getCharPref("sites.never"), -1);
+	if (this.mPrefs.getBoolPref("debug")) {
+	    for (var host in this.mSitePrefs)
+		this.debug('site pref: ' + host + ' -> ' + this.mSitePrefs[host]);
+	}
+    },
+
     init: function() {
-	gBrowser.addEventListener("pageshow", this.onPageShow, false);
+	// register main listener, responsible for creating the favicons
+	gBrowser.addEventListener("pageshow", this.bind(this.onPageShow), false);
+
+	// register context menu listener
 	document.getElementById('contentAreaContextMenu')
-	.addEventListener('popupshowing', gIdentFavIcon.showContextMenuItem, false);
+	.addEventListener('popupshowing', this.bind(this.showContextMenuItem), false);
+
+	// add preference observer
+	this.mPrefs.QueryInterface(Components.interfaces.nsIPrefBranch2);
+	this.mPrefs.addObserver("", {
+		observe: function(aSubject, aTopic, aData) {
+		    gIdentFavIcon.debug("mPrefs.observe() " + aData);
+		    if (aTopic != "nsPref:changed" || aData.indexOf("sites.") == -1)
+			return;
+		    gIdentFavIcon.parsePreferences();
+		}
+	    }, false);
+	this.parsePreferences();
     }
 };

@@ -6,6 +6,6 @@
   <script type="application/x-javascript" src="chrome://identfavicon/content/identfavicon.js"/>
   <popup id="contentAreaContextMenu">
     <menuitem id="favicon-reload" insertafter="context-reload"
-	      label="&reloadfavicon.label;" oncommand="identFavIcon.reloadFavicon();"/>
+	      label="&reloadfavicon.label;" oncommand="gIdentFavIcon.reloadFavicon();"/>
   </popup>
 </overlay>
