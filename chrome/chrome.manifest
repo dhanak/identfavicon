@@ -1,0 +1,6 @@
+content     identfavicon                           jar:chrome/identfavicon.jar!/content/
+skin        identfavicon classic/1.0               jar:chrome/identfavicon.jar!/skin/
+locale	    identfavicon			   en-US jar:chrome/identfavicon.jar!/locale/en-US/
+locale	    identfavicon			   hu-HU jar:chrome/identfavicon.jar!/locale/hu-HU/
+overlay     chrome://browser/content/browser.xul   chrome://identfavicon/content/identfavicon.xul
+style	    chrome://browser/content/browser.xul   chrome://identfavicon/skin/identfavicon.css
