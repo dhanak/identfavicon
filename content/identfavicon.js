@@ -272,15 +272,16 @@ var gIdentFavIcon = {
         }
     },
 
-    getTabForDocument: function(aDocURI) {
+    getTabsForDocument: function(aDocURI) {
+	var tabs = new Array();
 	for (var i = 0; i < gBrowser.mTabs.length; i++) {
 	    var tab = gBrowser.mTabs[i];
 	    if (gBrowser.getBrowserForTab(tab).currentURI.equals(aDocURI)) {
 		this.debug('Tab found for document ' + aDocURI.spec);
-		return tab;
+		tabs.push(tab);
 	    }
 	}
-	return null;
+	return tabs;
     },
 
     getExplicitFaviconURL: function(aDoc) {
@@ -318,11 +319,11 @@ var gIdentFavIcon = {
 	    if (!doc.contentType || doc.contentType.match('^image/.+$') ||
 		!gBrowser.shouldLoadFavIcon(docURI))
 		return;
-	    var tab = this.getTabForDocument(docURI);
-	    if (tab) {
-		var iconURL = this.getExplicitFaviconURL(doc) ||
-		    docURI.prePath + "/favicon.ico";
-		this.checkIconURL(tab, doc, iconURL);
+	    var tabs = this.getTabsForDocument(docURI);
+	    if (tabs.length > 0) {
+		var iconURL = this.getExplicitFaviconURL(doc) || docURI.prePath + "/favicon.ico";
+		for (var i = 0; i < tabs.length; ++i)
+		    this.checkIconURL(tabs[i], doc, iconURL);
 	    }
 	} catch (ex) {
 	    if (this.mPrefs.getBoolPref("debug"))
@@ -338,13 +339,15 @@ var gIdentFavIcon = {
 		!gBrowser.shouldLoadFavIcon(docURI))
 		return;
 	    this.debug("Reloading favicon for " + docURI.spec);
-	    var tab = this.getTabForDocument(docURI);
-	    if (tab) {
+	    var tabs = this.getTabsForDocument(docURI);
+	    if (tabs.length > 0) {
 		var iconURL = this.getExplicitFaviconURL(doc) || docURI.prePath + "/favicon.ico";
 		var iconURI = this.mIOS.newURI(iconURL, null, doc.baseURIObject);
 		gBrowser.mFaviconService.removeFailedFavicon(iconURI);
-		gBrowser.setIcon(tab, iconURL);
-		this.checkIconURL(tab, doc, iconURL);
+		for (var i = 0; i < tabs.length; ++i) {
+		    gBrowser.setIcon(tabs[i], iconURL);
+		    this.checkIconURL(tab[i], doc, iconURL);
+		}
 	    }
 	} catch (ex) {
 	    if (this.mPrefs.getBoolPref("debug"))
