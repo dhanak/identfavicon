@@ -46,14 +46,15 @@ var gIdentFavIcon = {
                            new Array( 10, 14, 22 ),
                            new Array( 20, 12, 24 ),
                            new Array( 10, 2, 12 ),
-                           new Array( 0, 2, 10 )
+                           new Array( 0, 2, 10 ),
+			   new Array( 7, 13, 17, 11 ) // small diamond in middle
                            ),
         centerPatches: new Array(0, 4, 8, 15),
 
         renderPatch: function (ctx, x, y, size, patch, turn, invert, color) {
+            //if (patch == 15) invert = !invert;
             patch %= this.patches.length;
             turn %= 4;
-            if (patch == 15) invert = !invert;
 
             var vertices = this.patches[patch];
             var offset = size / 2;
@@ -109,6 +110,14 @@ var gIdentFavIcon = {
             var green = (code >> 21) & 31;
             var red = (code >> 27) & 31;
             var color = "rgb(" + (red << 3) + "," + (green << 3) + "," + (blue << 3) + ")";
+
+	    gIdentFavIcon.debug(middleType + ' ' + cornerType + ' ' + sideType + ' ' +
+				middleInvert + ' ' + cornerInvert + ' ' + sideInvert);
+
+	    // avoid accidental swastika
+	    if (middleType == 0 && cornerType == 0 && sideType == 10 &&
+		middleInvert != cornerInvert && cornerInvert == sideInvert)
+ 		sideType += sideTurn + sideInvert;
 
             var ctx = node.getContext("2d");
 
@@ -173,7 +182,7 @@ var gIdentFavIcon = {
 
       @author  David Hanak
       @version 0.3
-      @date    July 20, 2009
+      @date    September 19, 2009
     */
     mIOS: Components.classes["@mozilla.org/network/io-service;1"]
     .getService(Components.interfaces.nsIIOService),
@@ -195,6 +204,14 @@ var gIdentFavIcon = {
             mDoc: aDoc,
 	    mRecheckTimeoutMS: 1000,
 	    mMaxAttemptCount: 10,
+	    mIconMimeTypes: new Array(
+		'image/x-icon',		    // obsolete ico
+		'image/vnd.microsoft.icon', // standard ico
+		'image/png',		    // PNG
+		'image/gif',		    // GIF
+		'image/jpeg',		    // valid JPEG
+		'image/jpg'		    // invalid but used JPEG
+	    ),
 
             QueryInterface: function(aIID) {
                 if (aIID.equals(Components.interfaces.nsIStreamListener) ||
@@ -213,39 +230,25 @@ var gIdentFavIcon = {
                         gIdentFavIcon.checkIconURL(this.mTab, this.mDoc, newLoc);
                     } else {
                         gIdentFavIcon.debug('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
+			var create = false;
                         if (!aChannel.requestSucceeded || aChannel.contentLength == 0) {
+			    create = true;
+			} else { // download succeeded, but it might not be a favicon
+			    var mimeType = aChannel.contentType.toLowerCase();
+			    for (var i = 0; i < this.mIconMimeTypes.length; i++) {
+				if (this.mIconMimeTypes[i] == mimeType)
+				    break;
+			    }
+			    create = (i == this.mIconMimeTypes.length);
+			}
+			if (create) {
                             gBrowser.mFaviconService.addFailedFavicon(aChannel.URI);
                             gIdentFavIcon.createFavicon(this.mTab, this.mDoc);
-			} else { // download succeeded, but it might not be a favicon
-			    this.checkFaviconURI(iconURL, 1);
 			}
 		    }
 		}
                 return 0;
 	    },
-
-	    checkFaviconURI: function(aIconURL, aAttempt) {
-		var docURI = gIdentFavIcon.getDocumentURI(this.mDoc);
-		var faviconURI;
-		try {
-		    faviconURI = gBrowser.mFaviconService.getFaviconForPage(docURI);
-		    gIdentFavIcon.debug('Expected: ' + aIconURL + '\nGot: ' + faviconURI.spec);
-		} catch (ex) {
-		    gIdentFavIcon.debug('getFaviconForPage() failed with ' + ex);
-		}
-		if (!faviconURI || aIconURL != faviconURI.spec) {
-		    if (aAttempt < this.mMaxAttemptCount) {
-			gIdentFavIcon.debug('Recheck #' + aAttempt + ' favicon with URL ' + aIconURL);
-			setTimeout(gIdentFavIcon.bind(function() {
-				    this.checkFaviconURI(aIconURL, aAttempt+1);
-				}, this), this.mRecheckTimeoutMS);
-		    } else { // give up and create favicon
-			gIdentFavIcon.debug('Gave up after ' + this.mMaxAttemptCount + ' attempts.');
-			gIdentFavIcon.createFavicon(this.mTab, this.mDoc);
-		    }
-		}
-            },
-
             onStartRequest: function(aRequest, aContext)                            { return 0; },
             onDataAvailable: function(aRequest, aContext, aStream, aOffset, aCount) { return 0; }
         };
