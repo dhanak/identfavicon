@@ -111,7 +111,8 @@ var gIdentFavIcon = {
             var red = (code >> 27) & 31;
             var color = "rgb(" + (red << 3) + "," + (green << 3) + "," + (blue << 3) + ")";
 
-	    gIdentFavIcon.debug(middleType + ' ' + cornerType + ' ' + sideType + ' ' +
+	    gIdentFavIcon.debug('Identicon patches: ' +
+				middleType + ' ' + cornerType + ' ' + sideType + ' ' +
 				middleInvert + ' ' + cornerInvert + ' ' + sideInvert);
 
 	    // avoid accidental swastika
@@ -349,12 +350,12 @@ var gIdentFavIcon = {
 		gBrowser.mFaviconService.removeFailedFavicon(iconURI);
 		for (var i = 0; i < tabs.length; ++i) {
 		    gBrowser.setIcon(tabs[i], iconURL);
-		    this.checkIconURL(tab[i], doc, iconURL);
+		    this.checkIconURL(tabs[i], doc, iconURL);
 		}
 	    }
 	} catch (ex) {
 	    if (this.mPrefs.getBoolPref("debug"))
-		alert("reladFavicon() threw exception " + ex);
+		alert("reloadFavicon() threw exception " + ex);
 	}
     },
 
