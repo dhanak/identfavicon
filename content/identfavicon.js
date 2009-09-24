@@ -199,72 +199,31 @@ var gIdentFavIcon = {
 	return function() { return aFunc.apply(aObj, arguments); };
     },
 
-    StreamListener: function(aTab, aDoc) {
-        return {
-            mTab: aTab,
-            mDoc: aDoc,
-	    mRecheckTimeoutMS: 1000,
-	    mMaxAttemptCount: 10,
-	    mIconMimeTypes: new Array(
-		'image/x-icon',		    // obsolete ico
-		'image/vnd.microsoft.icon', // standard ico
-		'image/png',		    // PNG
-		'image/gif',		    // GIF
-		'image/jpeg',		    // valid JPEG
-		'image/jpg'		    // invalid but used JPEG
-	    ),
-
-            QueryInterface: function(aIID) {
-                if (aIID.equals(Components.interfaces.nsIStreamListener) ||
-                    aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
-                    aIID.equals(Components.interfaces.nsISupports))
-                    return this;
-                throw Components.results.NS_NOINTERFACE;
-            },
-
-            onStopRequest: function(aRequest, aChannel /* aContext */, aStatusCode) {
-                if (aChannel instanceof Components.interfaces.nsIHttpChannel) {
-		    var iconURL = aChannel.URI.spec;
-		    gIdentFavIcon.debug('Request "' + iconURL + '" finished with code: ' + aChannel.responseStatus);
-                    if (aChannel.responseStatus == 301) { // redirect, check new location
-                        var newLoc = aChannel.getResponseHeader('Location');
-                        gIdentFavIcon.checkIconURL(this.mTab, this.mDoc, newLoc);
-                    } else {
-                        gIdentFavIcon.debug('Type: ' + aChannel.contentType + ', length: ' + aChannel.contentLength);
-			var create = false;
-                        if (!aChannel.requestSucceeded || aChannel.contentLength == 0) {
-			    create = true;
-			} else { // download succeeded, but it might not be a favicon
-			    var mimeType = aChannel.contentType.toLowerCase();
-			    for (var i = 0; i < this.mIconMimeTypes.length; i++) {
-				if (this.mIconMimeTypes[i] == mimeType)
-				    break;
-			    }
-			    create = (i == this.mIconMimeTypes.length);
-			}
-			if (create) {
-                            gBrowser.mFaviconService.addFailedFavicon(aChannel.URI);
-                            gIdentFavIcon.createFavicon(this.mTab, this.mDoc);
-			}
-		    }
-		}
-                return 0;
-	    },
-            onStartRequest: function(aRequest, aContext)                            { return 0; },
-            onDataAvailable: function(aRequest, aContext, aStream, aOffset, aCount) { return 0; }
-        };
-    },
-
     checkIconURL: function(aTab, aDoc, aIconURL) {
 	var sitepref = this.mSitePrefs[this.getDocumentURI(aDoc).host];
 	this.debug('Checking favicon at ' + aIconURL + ', site pref: ' + sitepref);
-        if (gBrowser.isFailedIcon(aIconURL) || sitepref > 0) {
-            // favicon loading failed in this session
+	if (sitepref < 0) {
+	    // do nothing
+	} else if (gBrowser.isFailedIcon(aIconURL) || sitepref > 0) {
+            // favicon loading failed in this session 
             this.createFavicon(aTab, aDoc);
-        } else if (!sitepref) {
+        } else {
             // no favicon information so far, check for presence
-            var channel = this.mIOS.newChannel(aIconURL, 0, null);
-            channel.asyncOpen(new this.StreamListener(aTab, aDoc), channel);
+	    var icon = new Image();
+	    icon.onload = function() {
+		gIdentFavIcon.debug("Image " + icon.width + "x" + icon.height + " loaded from " + aIconURL);
+		if (icon.width < 16 || icon.width != icon.height) {
+		    // not a valid favicon, generate one
+		    gIdentFavIcon.debug("Image loaded from " + aIconURL + " is not a valid icon.");
+		    setTimeout(function() { gIdentFavIcon.createFavicon(aTab, aDoc); }, 500);
+		}
+	    }
+	    icon.onerror = function() {
+		// favicon loading failed, generate one
+		gIdentFavIcon.debug("Failed to load icon from " + aIconURL);
+		setTimeout(function() { gIdentFavIcon.createFavicon(aTab, aDoc); }, 500);
+	    }
+	    icon.src = aIconURL;
         }
     },
 
