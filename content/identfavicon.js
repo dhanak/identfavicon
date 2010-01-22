@@ -72,9 +72,12 @@ var gIdentFavIcon = {
                 ctx.closePath();
             }
 
-            // build patch path
+            // offset and rotate coordinate space by patch position (x, y) and
+            // 'turn' before rendering patch shape
             ctx.translate(x + offset, y + offset);
             ctx.rotate(turn * Math.PI / 2);
+
+            // build patch path
             ctx.moveTo((vertices[0] % 5 * scale - offset),
                        (Math.floor(vertices[0] / 5) * scale - offset));
             for (var i = 1; i < vertices.length; i++) {
@@ -82,9 +85,6 @@ var gIdentFavIcon = {
                            (Math.floor(vertices[i] / 5) * scale - offset));
             }
             ctx.closePath();
-
-            // offset and rotate coordinate space by patch position (x, y) and
-            // 'turn' before rendering patch shape
 
             // render rotated patch using color (or its inverse)
             ctx.fillStyle = color;
@@ -124,12 +124,12 @@ var gIdentFavIcon = {
 
             // middle patch
             this.renderPatch(ctx, patchSize, patchSize, patchSize, middleType, 0, middleInvert, color);
-            // side patchs, starting from top and moving clock-wise
+            // side patches, starting from top and moving clock-wise
             this.renderPatch(ctx, patchSize, 0, patchSize, sideType, sideTurn++, sideInvert, color);
             this.renderPatch(ctx, patchSize * 2, patchSize, patchSize, sideType, sideTurn++, sideInvert, color);
             this.renderPatch(ctx, patchSize, patchSize * 2, patchSize, sideType, sideTurn++, sideInvert, color);
             this.renderPatch(ctx, 0, patchSize, patchSize, sideType, sideTurn++, sideInvert, color);
-            // corner patchs, starting from top left and moving clock-wise
+            // corner patches, starting from top left and moving clock-wise
             this.renderPatch(ctx, 0, 0, patchSize, cornerType, cornerTurn++, cornerInvert, color);
             this.renderPatch(ctx, patchSize * 2, 0, patchSize, cornerType, cornerTurn++, cornerInvert, color);
             this.renderPatch(ctx, patchSize * 2, patchSize * 2, patchSize, cornerType, cornerTurn++, cornerInvert, color);
@@ -193,6 +193,7 @@ var gIdentFavIcon = {
     .getService(Components.interfaces.nsIConsoleService),
 
     mSitePrefs: new Array(),
+    mTimers: new Array(),
 
     bind: function(aFunc, aObj) {
 	if (!aObj) aObj = this;
@@ -210,21 +211,35 @@ var gIdentFavIcon = {
         } else {
             // no favicon information so far, check for presence
 	    var icon = new Image();
+	    this.killDelayed(aDoc);
 	    icon.onload = function() {
 		gIdentFavIcon.debug("Image " + icon.width + "x" + icon.height + " loaded from " + aIconURL);
-		if (icon.width < 16 || icon.width != icon.height) {
+		if (icon.width < 4 || icon.height < 4) {
 		    // not a valid favicon, generate one
 		    gIdentFavIcon.debug("Image loaded from " + aIconURL + " is not a valid icon.");
-		    setTimeout(function() { gIdentFavIcon.createFavicon(aTab, aDoc); }, 500);
+		    gIdentFavIcon.createFaviconDelayed(aTab, aDoc);
 		}
 	    }
 	    icon.onerror = function() {
 		// favicon loading failed, generate one
 		gIdentFavIcon.debug("Failed to load icon from " + aIconURL);
-		setTimeout(function() { gIdentFavIcon.createFavicon(aTab, aDoc); }, 500);
+		gIdentFavIcon.createFaviconDelayed(aTab, aDoc);
 	    }
 	    icon.src = aIconURL;
         }
+    },
+
+    killDelayed: function(aDoc) {
+	if (this.mTimers[aDoc] != undefined) {
+	    clearTimeout(this.mTimers[aDoc]);
+	    this.mTimers[aDoc] = undefined;
+	}
+    },
+
+    createFaviconDelayed: function(aTab, aDoc) {
+	this.killDelayed(aDoc);
+	var timerid = setTimeout(function() { gIdentFavIcon.createFavicon(aTab, aDoc); }, 500);
+	this.mTimers[aDoc] = timerid;
     },
 
     getDocumentURI: function(aDoc) {
@@ -262,15 +277,19 @@ var gIdentFavIcon = {
         }
         return;
     },
+    
+    createIconDataURL: function(aCanvas, aURI) {
+        aCanvas.setAttribute('width', '16');
+        aCanvas.setAttribute('height', '16');
+        this.mRenderer.render(aCanvas, this.crc32(aURI.hostPort), 16);
+        return aCanvas.toDataURL("image/png", "");
+    },
 
     createFavicon: function(aTab, aDoc) {
         var docURI = this.getDocumentURI(aDoc);
         this.debug('Generating identicon for ' + docURI.spec);
         var canvas = aDoc.createElement("canvas");
-        canvas.setAttribute('width', '16');
-        canvas.setAttribute('height', '16');
-        this.mRenderer.render(canvas, this.crc32(docURI.hostPort), 16);
-        var iconURL = canvas.toDataURL("image/png", "");
+	var iconURL = this.createIconDataURL(canvas, docURI);
         gBrowser.setIcon(aTab, iconURL);
     },
 

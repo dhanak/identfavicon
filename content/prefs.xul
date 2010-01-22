@@ -39,6 +39,9 @@
 		oncommand="gIdentFavIcon.removeSelectedSites()"/>
 	<button id="btnRemoveAll" label="&button.removeall;"
 		oncommand="gIdentFavIcon.removeAllSites()"/>
+	<spacer flex="1"/>
+	<button id="btnClearIcons" label="&button.clearicons;"
+		oncommand="gIdentFavIcon.clearIcons()"/>
       </hbox>
     </groupbox>
   </prefpane>

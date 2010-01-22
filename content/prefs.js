@@ -21,6 +21,20 @@
 */
 
 var gIdentFavIcon = {
+    mIOS: Components.classes["@mozilla.org/network/io-service;1"]
+    .getService(Components.interfaces.nsIIOService),
+    mHistoryService: Components.classes["@mozilla.org/browser/nav-history-service;1"]
+    .getService(Components.interfaces.nsINavHistoryService),
+    mFaviconService: Components.classes["@mozilla.org/browser/favicon-service;1"]
+    .getService(Components.interfaces.nsIFaviconService),
+    
+    mIdentFavIcon: Components.classes["@mozilla.org/appshell/window-mediator;1"]
+    .getService(Components.interfaces.nsIWindowMediator)
+    .getMostRecentWindow("navigator:browser").gIdentFavIcon,
+    mLtrAtom: Components.classes["@mozilla.org/atom-service;1"]
+    .getService(Components.interfaces.nsIAtomService).getAtom("ltr"),
+    mCanvas: document.createElementNS("http://www.w3.org/1999/xhtml","html:canvas"),
+
     SiteState: function(aHost, aState) {
 	this.state = aState;
 	this.__defineGetter__("host", function() { return aHost; });
@@ -76,8 +90,6 @@ var gIdentFavIcon = {
     },
     
     init: function() {
-	this.mLtrAtom = Components.classes["@mozilla.org/atom-service;1"]
-		.getService(Components.interfaces.nsIAtomService).getAtom("ltr");
 	this.mBundle = document.getElementById("bundle");
 	this.mAlwaysPref = document.getElementById("prefSitesAlways");
 	this.mNeverPref = document.getElementById("prefSitesNever");
@@ -138,7 +150,7 @@ var gIdentFavIcon = {
 	    /*
 	    var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
 	    .getService(Components.interfaces.nsIPromptService);
-	    var message = this,mBundle.getString("invalidURI");
+	    var message = this.mBundle.getString("invalidURI");
 	    var title = this.mBundle.getString("invalidURITitle");
 	    promptService.alert(window, title, message);
 	    */
@@ -194,4 +206,52 @@ var gIdentFavIcon = {
 	tree.treeBoxObject.endUpdateBatch();
 	this.updatePrefs();
     },
+
+    clearHistoryIcons: function(aResult) {
+	var cont = aResult.root;
+	cont.containerOpen = true;
+	for (var i = 0; i < cont.childCount; i++) {
+	    var node = cont.getChild(i);
+	    var pageURI = this.mIOS.newURI(node.uri, null, null);
+	    try {
+		// throws an NS_ERROR_NOT_AVAILABLE if no favicon is linked with the page
+		var realIconURI = this.mFaviconService.getFaviconForPage(pageURI);
+		if (realIconURI.scheme != "data")
+		    continue;
+
+		var genIconURL = this.mIdentFavIcon.createIconDataURL(this.mCanvas, pageURI);
+		if (realIconURI.spec != genIconURL)
+		    continue;
+		
+		this.mIdentFavIcon.debug("Clearing generated icon for: " + node.title + " at " + node.uri);
+		this.mFaviconService
+		    .setAndLoadFaviconForPage(pageURI, this.mFaviconService.defaultFavicon, true);
+	    } catch (NS_ERROR_NOT_AVAILABLE) {}
+	}
+	cont.containerOpen = false;
+    },
+
+    clearIcons: function() {
+	try {
+	    var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"]
+	    .getService(Components.interfaces.nsIPromptService);
+	    var title = this.mBundle.getString("askClearIconsTitle");
+	    var message = this.mBundle.getString("askClearIconsMsg");
+	    if (!promptService.confirm(window, title, message))
+	        return;
+
+	    // clear icons in history...
+	    var options = this.mHistoryService.getNewQueryOptions();
+	    var query = this.mHistoryService.getNewQuery();
+	    options.queryType = Components.interfaces.nsINavHistoryQueryOptions.QUERY_TYPE_HISTORY;
+	    this.clearHistoryIcons(this.mHistoryService.executeQuery(query, options));
+	    
+	    // ...and in the bookmarks
+	    options.queryType = Components.interfaces.nsINavHistoryQueryOptions.QUERY_TYPE_BOOKMARKS;
+	    this.clearHistoryIcons(this.mHistoryService.executeQuery(query, options));
+
+	} catch (ex) {
+	    alert('clearIcons() threw exception ' + ex);
+	}
+    }
 };

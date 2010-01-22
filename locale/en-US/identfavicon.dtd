@@ -11,3 +11,4 @@
 <!ENTITY button.never			"Never">
 <!ENTITY button.remove			"Remove Site">
 <!ENTITY button.removeall		"Remove All Sites">
+<!ENTITY button.clearicons		"Clear Generated Icons">
