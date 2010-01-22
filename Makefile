@@ -8,6 +8,7 @@ chrome/identfavicon.jar: content/* locale/*/* skin/*
 
 identfavicon-$(VERSION)-fx.xpi: chrome/identfavicon.jar defaults/*/* install.rdf chrome/chrome.manifest
 	-$(RM) $@
-	zip $@ chrome/identfavicon.jar defaults/*/* install.rdf -j chrome/chrome.manifest
+	zip $@ chrome/identfavicon.jar defaults/*/* install.rdf
+	zip $@ -j chrome/chrome.manifest # store manifest in the root folder
 
 .PHONY: all
