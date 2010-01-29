@@ -115,10 +115,15 @@ var gIdentFavIcon = {
 				middleType + ' ' + cornerType + ' ' + sideType + ' ' +
 				middleInvert + ' ' + cornerInvert + ' ' + sideInvert);
 
-	    // avoid accidental swastika
-	    if (middleType == 0 && cornerType == 0 && sideType == 10 &&
-		middleInvert != cornerInvert && cornerInvert == sideInvert)
- 		sideType += sideTurn + sideInvert;
+	    // avoid accidental swastikas
+	    if ((middleType == 0 && cornerType == 0 && sideType == 10 &&
+		 middleInvert != cornerInvert && cornerInvert == sideInvert) ||
+		// http://www.aplumbers.com/contact-us.php
+		(middleType == 0 && cornerType == 10 && sideType == 10 &&
+		 middleInvert == cornerInvert && cornerInvert != sideInvert)) {
+		this.render(node, (1<<31)-code, size);
+		return;
+	    }
 
             var ctx = node.getContext("2d");
 
@@ -182,8 +187,8 @@ var gIdentFavIcon = {
       IdentFavicon generator
 
       @author  David Hanak
-      @version 0.3
-      @date    September 19, 2009
+      @version 0.3.2
+      @date    January 29, 2010
     */
     mIOS: Components.classes["@mozilla.org/network/io-service;1"]
     .getService(Components.interfaces.nsIIOService),
@@ -193,53 +198,44 @@ var gIdentFavIcon = {
     .getService(Components.interfaces.nsIConsoleService),
 
     mSitePrefs: new Array(),
-    mTimers: new Array(),
+    mThreadId: 0,
 
     bind: function(aFunc, aObj) {
 	if (!aObj) aObj = this;
 	return function() { return aFunc.apply(aObj, arguments); };
     },
 
-    checkIconURL: function(aTab, aDoc, aIconURL) {
+    checkIconURL: function(aTab, aDoc, aIconURL, aThreadId) {
 	var sitepref = this.mSitePrefs[this.getDocumentURI(aDoc).host];
-	this.debug('Checking favicon at ' + aIconURL + ', site pref: ' + sitepref);
+	this.debug(aThreadId + ': Checking favicon at ' + aIconURL + ', site pref: ' + sitepref);
+	aTab.mIdentFavIconThreadId = aThreadId;
 	if (sitepref < 0) {
 	    // do nothing
 	} else if (gBrowser.isFailedIcon(aIconURL) || sitepref > 0) {
             // favicon loading failed in this session 
-            this.createFavicon(aTab, aDoc);
+            this.createFavicon(aTab, aDoc, aThreadId);
         } else {
             // no favicon information so far, check for presence
 	    var icon = new Image();
-	    this.killDelayed(aDoc);
 	    icon.onload = function() {
-		gIdentFavIcon.debug("Image " + icon.width + "x" + icon.height + " loaded from " + aIconURL);
+		gIdentFavIcon.debug(aThreadId + ": Image " + icon.width + "x" + icon.height + " loaded from " + aIconURL);
 		if (icon.width < 4 || icon.height < 4) {
 		    // not a valid favicon, generate one
-		    gIdentFavIcon.debug("Image loaded from " + aIconURL + " is not a valid icon.");
-		    gIdentFavIcon.createFaviconDelayed(aTab, aDoc);
+		    gIdentFavIcon.debug(aThreadId + ": Image loaded from " + aIconURL + " is not a valid icon.");
+		    gIdentFavIcon.createFaviconDelayed(aTab, aDoc, aThreadId);
 		}
 	    }
 	    icon.onerror = function() {
 		// favicon loading failed, generate one
-		gIdentFavIcon.debug("Failed to load icon from " + aIconURL);
-		gIdentFavIcon.createFaviconDelayed(aTab, aDoc);
+		gIdentFavIcon.debug(aThreadId + ": Failed to load icon from " + aIconURL);
+		gIdentFavIcon.createFaviconDelayed(aTab, aDoc, aThreadId);
 	    }
 	    icon.src = aIconURL;
         }
     },
 
-    killDelayed: function(aDoc) {
-	if (this.mTimers[aDoc] != undefined) {
-	    clearTimeout(this.mTimers[aDoc]);
-	    this.mTimers[aDoc] = undefined;
-	}
-    },
-
-    createFaviconDelayed: function(aTab, aDoc) {
-	this.killDelayed(aDoc);
-	var timerid = setTimeout(function() { gIdentFavIcon.createFavicon(aTab, aDoc); }, 500);
-	this.mTimers[aDoc] = timerid;
+    createFaviconDelayed: function(aTab, aDoc, aThreadId) {
+	setTimeout(function() { gIdentFavIcon.createFavicon(aTab, aDoc, aThreadId); }, 500);
     },
 
     getDocumentURI: function(aDoc) {
@@ -285,19 +281,23 @@ var gIdentFavIcon = {
         return aCanvas.toDataURL("image/png", "");
     },
 
-    createFavicon: function(aTab, aDoc) {
+    createFavicon: function(aTab, aDoc, aThreadId) {
         var docURI = this.getDocumentURI(aDoc);
-        this.debug('Generating identicon for ' + docURI.spec);
+        this.debug(aThreadId + ': Generating identicon for ' + docURI.spec);
         var canvas = aDoc.createElement("canvas");
 	var iconURL = this.createIconDataURL(canvas, docURI);
-        gBrowser.setIcon(aTab, iconURL);
+	if (aTab.mIdentFavIconThreadId == aThreadId)
+	    gBrowser.setIcon(aTab, iconURL);
+	else
+	    this.debug(aThreadId + ": Thread ID mismatch, tab's thread id = " + aTab.mIdentFavIconThreadId);
     },
 
     onPageShow: function(aEvent) {
 	try {
+	    var threadId = this.mThreadId++;
 	    var doc = aEvent.originalTarget;
 	    var docURI = this.getDocumentURI(doc);
-	    this.debug('onPageShow() ' + docURI.spec);
+	    this.debug(threadId + ': onPageShow() ' + docURI.spec);
 	    if (!doc.contentType || doc.contentType.match('^image/.+$') ||
 		!gBrowser.shouldLoadFavIcon(docURI))
 		return;
@@ -305,7 +305,7 @@ var gIdentFavIcon = {
 	    if (tabs.length > 0) {
 		var iconURL = this.getExplicitFaviconURL(doc) || docURI.prePath + "/favicon.ico";
 		for (var i = 0; i < tabs.length; ++i)
-		    this.checkIconURL(tabs[i], doc, iconURL);
+		    this.checkIconURL(tabs[i], doc, iconURL, threadId);
 	    }
 	} catch (ex) {
 	    if (this.mPrefs.getBoolPref("debug"))
@@ -315,12 +315,13 @@ var gIdentFavIcon = {
 
     reloadFavicon: function() {
 	try {
+	    var threadId = this.mThreadId++;
 	    var doc = document.popupNode.ownerDocument;
 	    var docURI = this.getDocumentURI(doc);
 	    if (!doc.contentType || doc.contentType.match('^image/.+$') ||
 		!gBrowser.shouldLoadFavIcon(docURI))
 		return;
-	    this.debug("Reloading favicon for " + docURI.spec);
+	    this.debug(threadId + ": Reloading favicon for " + docURI.spec);
 	    var tabs = this.getTabsForDocument(docURI);
 	    if (tabs.length > 0) {
 		var iconURL = this.getExplicitFaviconURL(doc) || docURI.prePath + "/favicon.ico";
@@ -328,7 +329,7 @@ var gIdentFavIcon = {
 		gBrowser.mFaviconService.removeFailedFavicon(iconURI);
 		for (var i = 0; i < tabs.length; ++i) {
 		    gBrowser.setIcon(tabs[i], iconURL);
-		    this.checkIconURL(tabs[i], doc, iconURL);
+		    this.checkIconURL(tabs[i], doc, iconURL, threadId);
 		}
 	    }
 	} catch (ex) {
