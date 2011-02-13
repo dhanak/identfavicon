@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label		"Läs in sidans sajtikon igen">
+<!ENTITY preferences.title		"Inställningar för IdentFavIcon">
+<!ENTITY contextmenugroup.caption	"Snabbmenybeteende">
+<!ENTITY addcontextmenuitem.label	"Lägg till snabbmenyobjektet &quot;Läs in sidans sajtikon igen&quot;">
+<!ENTITY sites.caption			"Webbplatser">
+<!ENTITY column.site			"Webbplats">
+<!ENTITY column.state			"Sajtikon">
+<!ENTITY siteaddress.label		"Webbplatsadress">
+<!ENTITY desc.sitepref			"När skall en sajtikon skapas för ovanstående webbplats?">
+<!ENTITY button.always			"Alltid">
+<!ENTITY button.never			"Aldrig">
+<!ENTITY button.remove			"Ta bort webbplats">
+<!ENTITY button.removeall		"Ta bort alla webbplatser">
+<!ENTITY button.clearicons		"Rensa skapade ikoner">
