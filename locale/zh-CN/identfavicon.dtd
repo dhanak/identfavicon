@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "刷新页面收藏图标">
+<!ENTITY preferences.title "IdentFavIcon 首选项">
+<!ENTITY contextmenugroup.caption "上下文菜单行为">
+<!ENTITY addcontextmenuitem.label "添加上下文菜单项目“刷新”">
+<!ENTITY sites.caption "站点">
+<!ENTITY column.site "站点">
+<!ENTITY column.state "状态">
+<!ENTITY siteaddress.label "网站地址">
+<!ENTITY desc.sitepref "生成上述站点的收藏图标？">
+<!ENTITY button.always "总是">
+<!ENTITY button.never "永不">
+<!ENTITY button.remove "移除站点">
+<!ENTITY button.removeall "移除所有站点">
+<!ENTITY button.clearicons "清除已生成的图标">

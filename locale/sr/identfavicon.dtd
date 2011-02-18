@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "Поново учитај фавикону странице">
+<!ENTITY preferences.title "IdentFavIcon - опције">
+<!ENTITY contextmenugroup.caption "Понашање приручног менија">
+<!ENTITY addcontextmenuitem.label "Додај „Поново учитај” у приручни мени">
+<!ENTITY sites.caption "Странице">
+<!ENTITY column.site "Страница">
+<!ENTITY column.state "Држава">
+<!ENTITY siteaddress.label "Адреса странице">
+<!ENTITY desc.sitepref "Када желите да створите фавикону за горенаведену страницу?">
+<!ENTITY button.always "увек">
+<!ENTITY button.never "никад">
+<!ENTITY button.remove "Уклони страницу">
+<!ENTITY button.removeall "Уклони све странице">
+<!ENTITY button.clearicons "Очисти створене иконе">

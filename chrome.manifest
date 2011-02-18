@@ -2,5 +2,9 @@ content     identfavicon                           content/
 skin        identfavicon classic/1.0               skin/
 locale	    identfavicon			   en-US locale/en-US/
 locale	    identfavicon			   hu-HU locale/hu-HU/
+locale	    identfavicon			   sr locale/sr/
+locale	    identfavicon			   sv-SE locale/sv-SE/
+locale	    identfavicon			   de locale/de/
+locale	    identfavicon			   zh-CN locale/zh-CN/
 overlay     chrome://browser/content/browser.xul   chrome://identfavicon/content/identfavicon.xul
 style	    chrome://browser/content/browser.xul   chrome://identfavicon/skin/identfavicon.css

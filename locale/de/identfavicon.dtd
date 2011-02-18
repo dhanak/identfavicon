@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "Favicon neu laden">
+<!ENTITY preferences.title "IdentFavIcon - Einstellungen">
+<!ENTITY contextmenugroup.caption "Kontextmenü">
+<!ENTITY addcontextmenuitem.label "Kontextmenüeintrag &quot;Favicon neu laden&quot; anzeigen">
+<!ENTITY sites.caption "Websites">
+<!ENTITY column.site "Website">
+<!ENTITY column.state "Status">
+<!ENTITY siteaddress.label "Adresse der Website">
+<!ENTITY desc.sitepref "Ein Favicon für obige Website erzeugen:">
+<!ENTITY button.always "Immer">
+<!ENTITY button.never "Nie">
+<!ENTITY button.remove "Website entfernen">
+<!ENTITY button.removeall "Alle Websites entfernen">
+<!ENTITY button.clearicons "Erzeugte Favicons löschen">

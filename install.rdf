@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>identfavicon@david.hanak.hu</em:id>
-    <em:version>0.3.4</em:version>
+    <em:version>0.3.4b</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -26,5 +26,45 @@
     <em:homepageURL>http://www.cs.bme.hu/~dhanak/identfavicon/</em:homepageURL>
     <em:iconURL>chrome://identfavicon/skin/identfavicon.png</em:iconURL>
     <em:optionsURL>chrome://identfavicon/content/prefs.xul</em:optionsURL>  
+
+    <!-- German -->
+    <em:localized>
+      <Description>
+        <em:locale>de</em:locale>
+        <em:name>IdentFavIcon</em:name>
+        <em:description>Automatisches Erzeugen von Favicons (Identitätssymbolen) mittels sogenannter &quot;Identicons&quot; für Websites, die kein eigenes besitzen.</em:description>
+        <em:translator>o.roth (ReinekeFux) von BabelZilla.org</em:translator>
+      </Description>
+    </em:localized>
+
+    <!-- Hungarian -->
+    <em:localized>
+      <Description>
+        <em:locale>hu-HU</em:locale>
+        <em:name>IdentFavIcon</em:name>
+        <em:description>Könyvjelző-ikonnal (faviconnal) el nem látott oldalakhoz könnyen felismerhető, egyedi ikonok automatikus létrehozása a generikus ikon helyett, ún. identiconok segítségével.</em:description>
+	<em:translator>Hanák Dávid</em:translator>
+      </Description>
+    </em:localized>
+
+    <!-- Serbian -->
+    <em:localized>
+      <Description>
+	<em:locale>sr</em:locale>
+	<em:name>IdentFavIcon</em:name>
+	<em:description>Аутоматски ствара фавиконе за странице које их немају.</em:description>
+	<em:translator>DakSrbija on BabelZilla.org</em:translator>
+      </Description>
+    </em:localized>
+
+    <!-- Swedish -->
+    <em:localized>
+      <Description>
+	<em:locale>sv-SE</em:locale>
+	<em:name>IdentFavIcon</em:name>
+	<em:description>Använd identikoner för att automatiskt skapa sajtikoner för webbplatser som saknar sådana.</em:description>
+	<em:translator>Mikael Hiort af Ornäs (Lakrits on BabelZilla.org)</em:translator>
+      </Description>
+    </em:localized>
   </Description>
 </RDF>
