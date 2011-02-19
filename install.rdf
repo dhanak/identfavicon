@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>identfavicon@david.hanak.hu</em:id>
-    <em:version>0.3.4b</em:version>
+    <em:version>0.3.4c</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -47,13 +47,21 @@
       </Description>
     </em:localized>
 
+    <!-- Japanese -->
+    <em:localized>
+      <Description>
+        <em:locale>ja</em:locale>
+	<em:translator>Haebaru (BabelZilla.org)</em:translator>
+      </Description>
+    </em:localized>
+
     <!-- Serbian -->
     <em:localized>
       <Description>
 	<em:locale>sr</em:locale>
 	<em:name>IdentFavIcon</em:name>
 	<em:description>Аутоматски ствара фавиконе за странице које их немају.</em:description>
-	<em:translator>DakSrbija on BabelZilla.org</em:translator>
+	<em:translator>ДакСРБИЈА (BabelZilla.org)</em:translator>
       </Description>
     </em:localized>
 
@@ -63,7 +71,15 @@
 	<em:locale>sv-SE</em:locale>
 	<em:name>IdentFavIcon</em:name>
 	<em:description>Använd identikoner för att automatiskt skapa sajtikoner för webbplatser som saknar sådana.</em:description>
-	<em:translator>Mikael Hiort af Ornäs (Lakrits on BabelZilla.org)</em:translator>
+	<em:translator>Mikael Hiort af Ornäs (BabelZilla.org)</em:translator>
+      </Description>
+    </em:localized>
+
+    <!-- Chinese (Simplified) -->
+    <em:localized>
+      <Description>
+        <em:locale>zh-CN</em:locale>
+	<em:translator>yfdyh000 (BabelZilla.org)</em:translator>
       </Description>
     </em:localized>
   </Description>

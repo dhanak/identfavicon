@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "ファビコンを再読み込み">
+<!ENTITY preferences.title "IdentFavIcon　設定">
+<!ENTITY contextmenugroup.caption "コンテキストメニューの動作">
+<!ENTITY addcontextmenuitem.label "コンテキストメニューに&quot;再読み込み&quot; を追加">
+<!ENTITY sites.caption "サイト">
+<!ENTITY column.site "サイト">
+<!ENTITY column.state "状態">
+<!ENTITY siteaddress.label "Webサイトのアドレス">
+<!ENTITY desc.sitepref "上記のサイトのためのファビコンを生成しますか？">
+<!ENTITY button.always "常に生成">
+<!ENTITY button.never "生成しない">
+<!ENTITY button.remove "サイトを削除">
+<!ENTITY button.removeall "すべてのサイトを削除">
+<!ENTITY button.clearicons "生成したアイコンを消去">
