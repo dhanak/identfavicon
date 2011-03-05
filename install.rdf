@@ -37,6 +37,14 @@
       </Description>
     </em:localized>
 
+    <!-- French -->
+    <em:localized>
+      <Description>
+        <em:locale>fr</em:locale>
+	<em:translator>Jojaba - BabelZilla</em:translator>
+      </Description>
+    </em:localized>
+
     <!-- Hungarian -->
     <em:localized>
       <Description>

@@ -1,6 +1,7 @@
 content     identfavicon                           content/
 skin        identfavicon classic/1.0               skin/
 locale	    identfavicon			   en-US locale/en-US/
+locale	    identfavicon			   fr locale/fr/
 locale	    identfavicon			   hu-HU locale/hu-HU/
 locale	    identfavicon			   ja locale/ja/
 locale	    identfavicon			   sr locale/sr/

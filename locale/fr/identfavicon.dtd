@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "Recharger la favicône de la page">
+<!ENTITY preferences.title "Préférences de IdentFavIcon">
+<!ENTITY contextmenugroup.caption "Comportement du menu contextuel">
+<!ENTITY addcontextmenuitem.label "Ajouter l'élément d emenu contextuel « Recharger »">
+<!ENTITY sites.caption "Sites">
+<!ENTITY column.site "Site">
+<!ENTITY column.state "État">
+<!ENTITY siteaddress.label "Adresse du site Web">
+<!ENTITY desc.sitepref "Quand faut-il générer une favicône pour le site ci-dessus ?">
+<!ENTITY button.always "Toujours">
+<!ENTITY button.never "Jamais">
+<!ENTITY button.remove "Retirer le site">
+<!ENTITY button.removeall "Retirer tous les sites">
+<!ENTITY button.clearicons "Effacer les icônes générées">
