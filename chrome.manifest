@@ -4,6 +4,7 @@ locale	    identfavicon			   en-US locale/en-US/
 locale	    identfavicon			   fr locale/fr/
 locale	    identfavicon			   hu-HU locale/hu-HU/
 locale	    identfavicon			   ja locale/ja/
+locale	    identfavicon			   pt-BR locale/pt-BR/
 locale	    identfavicon			   sr locale/sr/
 locale	    identfavicon			   sv-SE locale/sv-SE/
 locale	    identfavicon			   de locale/de/

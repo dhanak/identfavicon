@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "Atualizar Página Favicon">
+<!ENTITY preferences.title "Preferências IdentFavIcon">
+<!ENTITY contextmenugroup.caption "Comportamento do menu de contexto">
+<!ENTITY addcontextmenuitem.label "Adicionar &quot;Reload&quot; como item no menu de contexto">
+<!ENTITY sites.caption "Sites">
+<!ENTITY column.site "Site">
+<!ENTITY column.state "Estado">
+<!ENTITY siteaddress.label "Endereço do site">
+<!ENTITY desc.sitepref "Quando gerar um favicon para o site acima?">
+<!ENTITY button.always "Sempre">
+<!ENTITY button.never "Nunca">
+<!ENTITY button.remove "Remover Site">
+<!ENTITY button.removeall "Remover todos os sites">
+<!ENTITY button.clearicons "Limpar Ícones Gerados">

@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>identfavicon@david.hanak.hu</em:id>
-    <em:version>0.3.4c</em:version>
+    <em:version>0.3.4.4</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -60,6 +60,14 @@
       <Description>
         <em:locale>ja</em:locale>
 	<em:translator>Haebaru (BabelZilla.org)</em:translator>
+      </Description>
+    </em:localized>
+
+    <!-- Portugese (Brasilian) -->
+    <em:localized>
+      <Description>
+        <em:locale>pt-BR</em:locale>
+	<em:translator>Humberto Sartini (http://www.hss.blog.br)</em:translator>
       </Description>
     </em:localized>
 
