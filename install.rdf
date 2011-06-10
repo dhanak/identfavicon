@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>identfavicon@david.hanak.hu</em:id>
-    <em:version>0.3.4.4</em:version>
+    <em:version>0.3.4.5</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -14,7 +14,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>4.0.*</em:maxVersion>
+        <em:maxVersion>6.*</em:maxVersion>
       </Description>
     </em:targetApplication>
    
@@ -34,6 +34,14 @@
         <em:name>IdentFavIcon</em:name>
         <em:description>Automatisches Erzeugen von Favicons (Identitätssymbolen) mittels sogenannter &quot;Identicons&quot; für Websites, die kein eigenes besitzen.</em:description>
         <em:translator>o.roth (ReinekeFux) von BabelZilla.org</em:translator>
+      </Description>
+    </em:localized>
+
+    <!-- Spanish -->
+    <em:localized>
+      <Description>
+        <em:locale>es-ES</em:locale>
+	<em:translator>Alejandro Pérez Martín (BabelZilla.org)</em:translator>
       </Description>
     </em:localized>
 
@@ -60,6 +68,16 @@
       <Description>
         <em:locale>ja</em:locale>
 	<em:translator>Haebaru (BabelZilla.org)</em:translator>
+      </Description>
+    </em:localized>
+
+    <!-- Polish -->
+    <em:localized>
+      <Description>
+        <em:locale>pl</em:locale>
+        <em:name>IdentFavIcon</em:name>
+        <em:description>Automatyczne tworzenie favikonek dla witryn, które ich nie posiadają.</em:description>
+        <em:translator>Marcin Borowczyk (BabelZilla.org)</em:translator>
       </Description>
     </em:localized>
 

@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "Recargar icono de la página">
+<!ENTITY preferences.title "Ajustes de IdentFavIcon">
+<!ENTITY contextmenugroup.caption "Comportamiento del menú contextual">
+<!ENTITY addcontextmenuitem.label "Añadir &quot;Recargar&quot; al menú contextual">
+<!ENTITY sites.caption "Sitios">
+<!ENTITY column.site "Sitio">
+<!ENTITY column.state "Estado">
+<!ENTITY siteaddress.label "Dirección del sitio web">
+<!ENTITY desc.sitepref "¿Cuándo generar un icono para el sitio anterior?">
+<!ENTITY button.always "Siempre">
+<!ENTITY button.never "Nunca">
+<!ENTITY button.remove "Eliminar sitio">
+<!ENTITY button.removeall "Eliminar todos los sitios">
+<!ENTITY button.clearicons "Limpiar iconos generados">

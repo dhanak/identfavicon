@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "Odśwież ikonę witryny">
+<!ENTITY preferences.title "Właściwości IdentFavIcon">
+<!ENTITY contextmenugroup.caption "Zachowanie menu kontekstowego">
+<!ENTITY addcontextmenuitem.label "Dodaj &quot;Odśwież&quot; do menu kontekstowego">
+<!ENTITY sites.caption "Witryny">
+<!ENTITY column.site "Witryna">
+<!ENTITY column.state "Stan">
+<!ENTITY siteaddress.label "Adres witryny sieciowej">
+<!ENTITY desc.sitepref "Kiedy generować ikonę dla danej witryny?">
+<!ENTITY button.always "Zawsze">
+<!ENTITY button.never "Nigdy">
+<!ENTITY button.remove "Usuń witrynę">
+<!ENTITY button.removeall "Usuń wszystkie witryny">
+<!ENTITY button.clearicons "Przeczyść wygenerowane ikony">
