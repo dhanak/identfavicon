@@ -1,0 +1,14 @@
+<!ENTITY reloadfavicon.label "Sayfadaki Favicon\'ları Geri Yükle">
+<!ENTITY preferences.title "FavSimgeTanımla Tercihleri">
+<!ENTITY contextmenugroup.caption "İçerik Menüsü Tavrı">
+<!ENTITY addcontextmenuitem.label "&quot;Geri Yükle&quot; içerik menüsü öğesini ekle">
+<!ENTITY sites.caption "Siteler">
+<!ENTITY column.site "Site">
+<!ENTITY column.state "Durum">
+<!ENTITY siteaddress.label "Ağ Sayfasının Adresi">
+<!ENTITY desc.sitepref "Yukarıdaki site için ne zaman favicon üretilsin?">
+<!ENTITY button.always "Her zaman">
+<!ENTITY button.never "Hiçbir zaman">
+<!ENTITY button.remove "Siteyi Kaldır">
+<!ENTITY button.removeall "Tüm Siteleri Kaldır">
+<!ENTITY button.clearicons "Üretilen simgeleri temizle">
