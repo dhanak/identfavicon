@@ -187,8 +187,8 @@ var gIdentFavIcon = {
       IdentFavicon generator
 
       @author  David Hanak
-      @version 0.3.2
-      @date    January 29, 2010
+      @version 0.3.4.6
+      @date    November 11, 2011
     */
     mIOS: Components.classes["@mozilla.org/network/io-service;1"]
     .getService(Components.interfaces.nsIIOService),
@@ -238,11 +238,15 @@ var gIdentFavIcon = {
 	setTimeout(function() { gIdentFavIcon.createFavicon(aTab, aDoc, aThreadId); }, 500);
     },
 
+    getDocumentBaseURI: function(aDoc) {
+	return this.mIOS.newURI(aDoc.baseURI, null, null);
+    },
+
     getDocumentURI: function(aDoc) {
         try {
             return this.mIOS.newURI(aDoc.location, null, null);
         } catch (e) { // NS_ERROR_MALFORMED_URI
-            return aDoc.baseURIObject;
+            return this.getDocumentBaseURI(aDoc);
         }
     },
 
@@ -268,7 +272,7 @@ var gIdentFavIcon = {
             var rel = links.item(i).getAttribute('rel');
             if (rel && (rel.toLowerCase() == 'shortcut icon' || rel.toLowerCase() == 'icon')) {
                 var iconHref = links.item(i).getAttribute('href');
-                return this.mIOS.newURI(iconHref, null, aDoc.baseURIObject).spec;
+                return this.mIOS.newURI(iconHref, null, this.getDocumentBaseURI(aDoc)).spec;
             }
         }
         return;
@@ -325,7 +329,7 @@ var gIdentFavIcon = {
 	    var tabs = this.getTabsForDocument(docURI);
 	    if (tabs.length > 0) {
 		var iconURL = this.getExplicitFaviconURL(doc) || docURI.prePath + "/favicon.ico";
-		var iconURI = this.mIOS.newURI(iconURL, null, doc.baseURIObject);
+		var iconURI = this.mIOS.newURI(iconURL, null, this.getDocumentBaseURI(doc));
 		gBrowser.mFaviconService.removeFailedFavicon(iconURI);
 		for (var i = 0; i < tabs.length; ++i) {
 		    gBrowser.setIcon(tabs[i], iconURL);

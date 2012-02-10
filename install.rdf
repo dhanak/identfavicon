@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>identfavicon@david.hanak.hu</em:id>
-    <em:version>0.3.4.5</em:version>
+    <em:version>0.3.4.7</em:version>
     <em:type>2</em:type>
    
     <!-- Target Application this extension can install into, 
@@ -14,7 +14,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>6.*</em:maxVersion>
+        <em:maxVersion>10.*</em:maxVersion>
       </Description>
     </em:targetApplication>
    
@@ -106,6 +106,14 @@
 	<em:name>IdentFavIcon</em:name>
 	<em:description>Använd identikoner för att automatiskt skapa sajtikoner för webbplatser som saknar sådana.</em:description>
 	<em:translator>Mikael Hiort af Ornäs (BabelZilla.org)</em:translator>
+      </Description>
+    </em:localized>
+
+    <!-- Turkish -->
+    <em:localized>
+      <Description>
+        <em:locale>tr</em:locale>
+	<em:translator>alfapegasi (BabelZilla.org)</em:translator>
       </Description>
     </em:localized>
 

@@ -11,5 +11,6 @@ locale	    identfavicon			   sr locale/sr/
 locale	    identfavicon			   sv-SE locale/sv-SE/
 locale	    identfavicon			   de locale/de/
 locale	    identfavicon			   zh-CN locale/zh-CN/
+locale	    identfavicon			   tr locale/tr/
 overlay     chrome://browser/content/browser.xul   chrome://identfavicon/content/identfavicon.xul
 style	    chrome://browser/content/browser.xul   chrome://identfavicon/skin/identfavicon.css
